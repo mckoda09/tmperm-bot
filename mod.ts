@@ -17,7 +17,6 @@ bot.chatType("supergroup").hears(["Готов", "готов"], async (ctx) => {
     "message",
     ctx.message.reply_to_message.forward_origin.message_id,
   ]);
-
   if (!entry.value) return;
 
   await bot.api.deleteMessage(groupId, entry.value);
