@@ -7,7 +7,7 @@ const commentsId = Deno.env.get("COMMENTS_ID") || "";
 export const bot = new Bot(Deno.env.get("BOT_TOKEN") || "");
 const kv = await Deno.openKv();
 
-bot.chatType("supergroup").hears(["Готов", "готов"], async (ctx) => {
+bot.hears(["Готов", "готов"], async (ctx) => {
   if (ctx.chat.id.toString() != commentsId) return;
   if (!ctx.message.reply_to_message) return;
   if (!ctx.message.reply_to_message.forward_origin) return;
@@ -19,6 +19,7 @@ bot.chatType("supergroup").hears(["Готов", "готов"], async (ctx) => {
   ]);
   if (!entry.value) return;
 
+  console.log("deleting");
   await bot.api.deleteMessage(groupId, entry.value);
 });
 
