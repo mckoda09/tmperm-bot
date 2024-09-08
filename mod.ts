@@ -14,13 +14,14 @@ bot.hears(["Готов", "готов"], async (ctx) => {
   if (!ctx.message.reply_to_message.forward_origin) return;
   if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
 
+  await bot.api.sendMessage(groupId, "REMOVING");
+
   const entry = await kv.get<number>([
     "message",
     ctx.message.reply_to_message.forward_origin.message_id,
   ]);
   if (!entry.value) return;
 
-  await bot.api.sendMessage(groupId, "REMOVING");
   await bot.api.deleteMessage(groupId, entry.value);
 });
 
