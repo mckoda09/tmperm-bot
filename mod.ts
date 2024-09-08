@@ -9,6 +9,7 @@ const kv = await Deno.openKv();
 
 bot.hears(["Готов", "готов"], async (ctx) => {
   if (ctx.chat.id.toString() != commentsId) return;
+  if (!ctx.message) return;
   if (!ctx.message.reply_to_message) return;
   if (!ctx.message.reply_to_message.forward_origin) return;
   if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
@@ -19,7 +20,7 @@ bot.hears(["Готов", "готов"], async (ctx) => {
   ]);
   if (!entry.value) return;
 
-  console.log("deleting");
+  await bot.api.sendMessage(groupId, "REMOVING");
   await bot.api.deleteMessage(groupId, entry.value);
 });
 
