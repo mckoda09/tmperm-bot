@@ -4,6 +4,6 @@
     "grammy": "npm:grammy@^1.30.0"
   },
   "tasks": {
-    "start": "deno run -A --unstable-kv --watch dev.ts"
+    "start": "deno run -A --unstable-kv --unstable-cron --watch dev.ts"
   }
 }
