@@ -3,7 +3,8 @@
   "packages": {
     "specifiers": {
       "jsr:@std/dotenv@^0.225.2": "jsr:@std/dotenv@0.225.2",
-      "npm:grammy@^1.30.0": "npm:grammy@1.30.0"
+      "npm:grammy@^1.30.0": "npm:grammy@1.30.0",
+      "npm:nanoid@^5.0.7": "npm:nanoid@5.0.7"
     },
     "jsr": {
       "@std/dotenv@0.225.2": {
@@ -44,6 +45,10 @@
         "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
         "dependencies": {}
       },
+      "nanoid@5.0.7": {
+        "integrity": "sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ==",
+        "dependencies": {}
+      },
       "node-fetch@2.7.0": {
         "integrity": "sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==",
         "dependencies": {
@@ -71,7 +76,8 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/dotenv@^0.225.2",
-      "npm:grammy@^1.30.0"
+      "npm:grammy@^1.30.0",
+      "npm:nanoid@^5.0.7"
     ]
   }
 }

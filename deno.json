@@ -1,9 +1,10 @@
 {
+  "tasks": {
+    "start": "deno run -A --unstable-kv --watch dev.ts"
+  },
   "imports": {
     "@std/dotenv": "jsr:@std/dotenv@^0.225.2",
-    "grammy": "npm:grammy@^1.30.0"
-  },
-  "tasks": {
-    "start": "deno run -A --unstable-kv --unstable-cron --watch dev.ts"
+    "grammy": "npm:grammy@^1.30.0",
+    "nanoid": "npm:nanoid@^5.0.7"
   }
 }

@@ -1,82 +1,84 @@
 import { Bot } from "grammy";
-
-const channelId = Deno.env.get("CHANNEL_ID") || "";
-const groupId = Deno.env.get("GROUP_ID") || "";
-const commentsId = Deno.env.get("COMMENTS_ID") || "";
+import { addTask, kv, listTasks, removeTask } from "./kv.ts";
 
 export const bot = new Bot(Deno.env.get("BOT_TOKEN") || "");
-const kv = await Deno.openKv();
+const channelId = Number(Deno.env.get("CHANNEL_ID") || "");
+const groupId = Number(Deno.env.get("GROUP_ID") || "");
 
-bot.hears(["Готов", "готов"], async (ctx) => {
-  if (ctx.chat.id.toString() != commentsId) return;
-  if (!ctx.message) return;
-  if (!ctx.message.reply_to_message) return;
-  if (!ctx.message.reply_to_message.forward_origin) return;
-  if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
+// PINNED POST
 
-  const entry = await kv.get<number>([
-    "message",
-    ctx.message.reply_to_message.forward_origin.message_id,
-  ]);
-  if (!entry.value) return;
+bot.chatType("channel").command("post", async (ctx) => {
+  if (ctx.chat.id != channelId) return;
+  await ctx.deleteMessage();
 
-  await kv.delete(["inwork", entry.value]);
-  await bot.api.deleteMessage(groupId, entry.value);
+  const newMessage = await ctx.reply(await generateTasksListText(), {
+    parse_mode: "HTML",
+  });
+  await kv.set(["message"], newMessage.message_id);
+
+  console.log("POST - MADE");
 });
 
-bot.hears(["Вернуть", "вернуть"], async (ctx) => {
-  if (ctx.chat.id.toString() != commentsId) return;
-  if (!ctx.message) return;
+// NEW POST
+
+bot.chatType("channel").on("msg:text", async (ctx) => {
+  if (ctx.chat.id != channelId) return;
+
+  await addTask(ctx.channelPost.message_id, ctx.channelPost.text);
+  await updateTasksList();
+
+  console.log("CHANNEL POST - ADDED");
+});
+
+bot.chatType("supergroup").hears(["готов", "Готов"], async (ctx) => {
+  if (ctx.chat.id != groupId) return;
   if (!ctx.message.reply_to_message) return;
   if (!ctx.message.reply_to_message.forward_origin) return;
+  if (!ctx.message.reply_to_message.is_automatic_forward) return;
   if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
 
-  const message = await ctx.api.forwardMessage(
-    groupId,
+  await removeTask(ctx.message.reply_to_message.forward_origin.message_id);
+  await updateTasksList();
+
+  console.log("TASK - REMOVED");
+});
+
+bot.chatType("supergroup").hears(["вернуть", "Вернуть"], async (ctx) => {
+  if (ctx.chat.id != groupId) return;
+  if (!ctx.message.reply_to_message) return;
+  if (!ctx.message.reply_to_message.forward_origin) return;
+  if (!ctx.message.reply_to_message.is_automatic_forward) return;
+  if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
+  if (!ctx.message.reply_to_message.text) return;
+
+  const forwardOrigin = ctx.message.reply_to_message.forward_origin;
+  await addTask(forwardOrigin.message_id, ctx.message.reply_to_message.text);
+  await updateTasksList();
+
+  console.log("TASKS - RENEWED");
+});
+
+const updateTasksList = async () => {
+  const messageId = await kv.get<number>(["message"]);
+  if (!messageId.versionstamp) return;
+
+  await bot.api.editMessageText(
     channelId,
-    ctx.message.reply_to_message.forward_origin.message_id,
+    messageId.value,
+    await generateTasksListText(),
+    { parse_mode: "HTML" },
   );
-  await kv.set(
-    ["message", ctx.message.reply_to_message.forward_origin.message_id],
-    message.message_id,
-  );
-  await kv.set(["inwork", message.message_id], true);
-});
+};
 
-bot.chatType("channel").on("channel_post", async (ctx) => {
-  if (ctx.chat.id.toString() != channelId) return;
+const generateTasksListText = async () => {
+  const tasks = await listTasks();
+  if (!tasks.length) return "В работе нет заказ-нарядов.";
+  return tasks
+    .map(
+      (task, index) =>
+        `${index + 1}. <a href='https://t.me/c/${channelId.toString().substring(4)}/${task.key[1].toString()}'>${task.value}</a>`,
+    )
+    .join("\n");
+};
 
-  const message = await ctx.forwardMessage(groupId);
-  await kv.set(["message", ctx.channelPost.message_id], message.message_id);
-  await kv.set(["inwork", message.message_id], true);
-});
-
-async function updatePosts() {
-  for await (const entry of kv.list<number>({ prefix: ["inwork"] })) {
-    const message = await bot.api.forwardMessage(
-      groupId,
-      groupId,
-      entry.key[1] as number,
-      {
-        disable_notification: true,
-      },
-    );
-    await bot.api.deleteMessage(groupId, entry.key[1] as number);
-    await kv.delete(entry.key);
-
-    if (!message.forward_origin) continue;
-    if (message.forward_origin.type != "channel") continue;
-
-    await kv.set(
-      ["message", message.forward_origin.message_id],
-      message.message_id,
-    );
-    await kv.set(["inwork", message.message_id], true);
-  }
-}
-
-Deno.cron("Update in work", "0 22 * * *", async () => {
-  await updatePosts();
-});
-
-bot.catch((error) => console.error(error.message));
+bot.catch((error) => console.log(error.message));
