@@ -21,14 +21,16 @@ bot.chatType("channel").command("post", async (ctx) => {
 
 // NEW POST
 
-bot.chatType("channel").on("msg:text", async (ctx) => {
+bot.chatType("channel").on(":caption", async (ctx) => {
   if (ctx.chat.id != channelId) return;
 
-  await addTask(ctx.channelPost.message_id, ctx.channelPost.text);
+  await addTask(ctx.channelPost.message_id, ctx.channelPost.caption);
   await updateTasksList();
 
   console.log("CHANNEL POST - ADDED");
 });
+
+// READY
 
 bot.chatType("supergroup").hears(["готов", "Готов"], async (ctx) => {
   if (ctx.chat.id != groupId) return;
@@ -42,6 +44,8 @@ bot.chatType("supergroup").hears(["готов", "Готов"], async (ctx) => {
 
   console.log("TASK - REMOVED");
 });
+
+// RENEW
 
 bot.chatType("supergroup").hears(["вернуть", "Вернуть"], async (ctx) => {
   if (ctx.chat.id != groupId) return;
@@ -57,6 +61,8 @@ bot.chatType("supergroup").hears(["вернуть", "Вернуть"], async (ct
 
   console.log("TASKS - RENEWED");
 });
+
+// UTILS
 
 const updateTasksList = async () => {
   const messageId = await kv.get<number>(["message"]);
