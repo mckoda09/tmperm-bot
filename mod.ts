@@ -48,12 +48,19 @@ bot.chatType("supergroup").hears(["готов", "Готов"], async (ctx) => {
 // RENEW
 
 bot.chatType("supergroup").hears(["вернуть", "Вернуть"], async (ctx) => {
+  console.log("start");
   if (ctx.chat.id != groupId) return;
+  console.log("1");
   if (!ctx.message.reply_to_message) return;
+  console.log("2");
   if (!ctx.message.reply_to_message.forward_origin) return;
+  console.log("3");
   if (!ctx.message.reply_to_message.is_automatic_forward) return;
+  console.log("4");
   if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
+  console.log("5");
   if (!ctx.message.reply_to_message.text) return;
+  console.log("6");
 
   const forwardOrigin = ctx.message.reply_to_message.forward_origin;
   await addTask(forwardOrigin.message_id, ctx.message.reply_to_message.text);
@@ -86,5 +93,9 @@ const generateTasksListText = async () => {
     )
     .join("\n");
 };
+
+bot.chatType("private").command("update", async () => {
+  await updateTasksList();
+});
 
 bot.catch((error) => console.log(error.message));
