@@ -59,11 +59,11 @@ bot.chatType("supergroup").hears(["вернуть", "Вернуть"], async (ct
   console.log("4");
   if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
   console.log("5");
-  if (!ctx.message.reply_to_message.text) return;
+  if (!ctx.message.reply_to_message.caption) return;
   console.log("6");
 
   const forwardOrigin = ctx.message.reply_to_message.forward_origin;
-  await addTask(forwardOrigin.message_id, ctx.message.reply_to_message.text);
+  await addTask(forwardOrigin.message_id, ctx.message.reply_to_message.caption);
   await updateTasksList();
 
   console.log("TASKS - RENEWED");
