@@ -78,4 +78,11 @@ bot.chatType("supergroup").hears(["в работу", "В работу"], async (
   await ctx.react("👌");
 });
 
+bot.chatType("supergroup").hears(["обновить", "Обновить"], async (ctx) => {
+  if (ctx.chat.id != groupId) return;
+
+  await updatePost();
+  await ctx.react("👌");
+});
+
 bot.catch((error) => console.error(error.message));
