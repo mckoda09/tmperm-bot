@@ -1,4 +1,4 @@
-import { postKey, taskKey, type Task } from "./db.ts";
+import { postKey, type Task, taskKey } from "./db.ts";
 import { bot, channelId, groupId, kv } from "./mod.ts";
 import { genPostText } from "./utils.ts";
 
@@ -19,8 +19,8 @@ export const updatePost = async () => {
   });
 };
 
-export const setWork = async (id: number, text: string) => {
-  await kv.set(taskKey(id), { status: "work", text });
+export const setWork = async (id: number, text: string, date: Date) => {
+  await kv.set(taskKey(id), { status: "work", text, date });
 };
 export const setOut = async (id: number, text: string) => {
   await kv.set(taskKey(id), { status: "out", text });

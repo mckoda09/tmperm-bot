@@ -27,7 +27,11 @@ bot.chatType("channel").on("channel_post", async (ctx) => {
   if (channelId != ctx.chat.id) return;
   if (!ctx.channelPost.caption) return;
 
-  await setWork(ctx.channelPost.message_id, ctx.channelPost.caption);
+  await setWork(
+    ctx.channelPost.message_id,
+    ctx.channelPost.caption,
+    new Date(),
+  );
   await updatePost();
 });
 
@@ -73,6 +77,7 @@ bot.chatType("supergroup").hears(["в работу", "В работу"], async (
   await setWork(
     ctx.message.reply_to_message.forward_origin.message_id,
     ctx.message.reply_to_message.caption,
+    new Date(),
   );
   await updatePost();
   await ctx.react("👌");
@@ -83,6 +88,23 @@ bot.chatType("supergroup").hears(["обновить", "Обновить"], async
 
   await updatePost();
   await ctx.react("👌");
+});
+
+bot.chatType("supergroup").on("message:text", async (ctx) => {
+  if (ctx.chat.id != groupId) return;
+  if (!ctx.message.text.toLowerCase().startsWith("убрать")) return;
+
+  try {
+    const deleteLink = ctx.message.text.split(" ")[1];
+    const deleteId = deleteLink.split("/").pop();
+
+    await deleteTask(Number(deleteId));
+
+    await updatePost();
+    await ctx.react("👌");
+  } catch {
+    await ctx.react("🤷");
+  }
 });
 
 bot.catch((error) => console.error(error.message));

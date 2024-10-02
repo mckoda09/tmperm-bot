@@ -11,20 +11,40 @@ export const genPostText = async () => {
     "<b>В работе:</b>\n" +
     (work.length
       ? work
-          .map(
-            (task, i) =>
-              `${i + 1}. <a href="https://t.me/c/${channelId.toString().slice(4)}/${task.key[1].toString()}">${task.value.text}</a>`,
-          )
-          .join("\n")
+        .map(
+          (task, i) =>
+            `${i + 1}. <a href="https://t.me/c/${
+              channelId.toString().slice(4)
+            }/${task.key[1].toString()}">${task.value.text}</a> (${
+              task.value.date
+                ? task.value.date.toLocaleDateString("ru", {
+                  day: "numeric",
+                  month: "short",
+                  timeZone: "Asia/Yekaterinburg",
+                })
+                : "???"
+            })`,
+        )
+        .join("\n")
       : "Заказ-нарядов в работе нет.") +
     "\n\n<b>На выдачу:</b>\n" +
     (out.length
       ? out
-          .map(
-            (task, i) =>
-              `${i + 1}. <a href="https://t.me/c/${channelId.toString().slice(4)}/${task.key[1].toString()}">${task.value.text}</a>`,
-          )
-          .join("\n")
+        .map(
+          (task, i) =>
+            `${i + 1}. <a href="https://t.me/c/${
+              channelId.toString().slice(4)
+            }/${task.key[1].toString()}">${task.value.text}</a> (${
+              task.value.date
+                ? task.value.date.toLocaleDateString("ru", {
+                  day: "numeric",
+                  month: "short",
+                  timeZone: "Asia/Yekaterinburg",
+                })
+                : "???"
+            })`,
+        )
+        .join("\n")
       : "Заказ-нарядов на выдачу нет.")
   );
 };
