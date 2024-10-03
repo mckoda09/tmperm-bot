@@ -23,7 +23,8 @@ export const setWork = async (id: number, text: string, date: Date) => {
   await kv.set(taskKey(id), { status: "work", text, date });
 };
 export const setOut = async (id: number, text: string) => {
-  await kv.set(taskKey(id), { status: "out", text });
+  const entry = await kv.get<Task>(taskKey(id))
+  await kv.set(taskKey(id), { status: "out", text, date: entry.value?.date });
 };
 export const deleteTask = async (id: number) => {
   await kv.delete(taskKey(id));
