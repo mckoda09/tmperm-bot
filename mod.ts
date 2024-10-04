@@ -53,18 +53,21 @@ bot
     await ctx.react("👌");
   });
 
-bot.chatType("supergroup").hears(["выдан", "Выдан"], async (ctx) => {
-  if (ctx.chat.id != groupId) return;
-  if (!ctx.message.reply_to_message) return;
-  if (!ctx.message.reply_to_message.is_automatic_forward) return;
-  if (!ctx.message.reply_to_message.forward_origin) return;
-  if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
-  if (!ctx.message.reply_to_message.caption) return;
+bot.chatType("supergroup").hears(
+  ["выдан", "Выдан", "выдал", "Выдал"],
+  async (ctx) => {
+    if (ctx.chat.id != groupId) return;
+    if (!ctx.message.reply_to_message) return;
+    if (!ctx.message.reply_to_message.is_automatic_forward) return;
+    if (!ctx.message.reply_to_message.forward_origin) return;
+    if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
+    if (!ctx.message.reply_to_message.caption) return;
 
-  await deleteTask(ctx.message.reply_to_message.forward_origin.message_id);
-  await updatePost();
-  await ctx.react("👌");
-});
+    await deleteTask(ctx.message.reply_to_message.forward_origin.message_id);
+    await updatePost();
+    await ctx.react("👌");
+  },
+);
 
 bot.chatType("supergroup").hears(["в работу", "В работу"], async (ctx) => {
   if (ctx.chat.id != groupId) return;

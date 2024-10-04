@@ -15,7 +15,7 @@ export const genPostText = async () => {
           (task, i) =>
             `${i + 1}. <a href="https://t.me/c/${
               channelId.toString().slice(4)
-            }/${task.key[1].toString()}">${task.value.text}</a> (${
+            }/${task.key[1].toString()}">${task.value.text}</a> (от ${
               task.value.date
                 ? task.value.date.toLocaleDateString("ru", {
                   day: "numeric",
@@ -34,7 +34,7 @@ export const genPostText = async () => {
           (task, i) =>
             `${i + 1}. <a href="https://t.me/c/${
               channelId.toString().slice(4)
-            }/${task.key[1].toString()}">${task.value.text}</a> (${
+            }/${task.key[1].toString()}">${task.value.text}</a> (от ${
               task.value.date
                 ? task.value.date.toLocaleDateString("ru", {
                   day: "numeric",
