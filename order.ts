@@ -80,7 +80,7 @@ export const genPostText = async () => {
           timeZone: "Asia/Yekaterinburg",
           day: "numeric",
           month: "short",
-        }) || "???"
+        })
       } <a href="https://t.me/c/${
         channelId.toString().slice(3)
       }/${t.messageId}">${t.caption}</a>`
@@ -93,20 +93,20 @@ export const genPostText = async () => {
           timeZone: "Asia/Yekaterinburg",
           day: "numeric",
           month: "short",
-        }) || "???"
+        })
       } <a href="https://t.me/c/${
         channelId.toString().slice(3)
       }/${t.messageId}">${t.caption}</a>`
     ).join("\n");
 
-  const recentText = "<b>Недавние</b>\n" +
+  const recentText = "<b>Недавно выданные</b>\n" +
     recentTasks.map((t, i) =>
       `${i + 1}. ${
         t.createdAt.toLocaleDateString("ru", {
           timeZone: "Asia/Yekaterinburg",
           day: "numeric",
           month: "short",
-        }) || "???"
+        })
       } <a href="https://t.me/c/${
         channelId.toString().slice(3)
       }/${t.messageId}">${t.caption}</a>`
