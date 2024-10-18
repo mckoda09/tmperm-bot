@@ -1,146 +1,81 @@
 import { Bot } from "grammy";
+import { verify } from "./verify.ts";
+import { deletePost, getPostData, setPostData } from "./db.ts";
 import {
-  createOrder,
-  deleteOrder,
-  type OrderData,
-  orderKey,
-  resetOrderDate,
-  setPost,
-  updatePost,
-} from "./order.ts";
-import { setOrderStatus } from "./order.ts";
-import { requestOrderDelete } from "./order.ts";
+  generateKeyboard,
+  generateText,
+  keyboardComposer,
+} from "./keyboard.ts";
+import { listComposer, updateList } from "./list.ts";
 
+// Init main objects
 export const bot = new Bot(Deno.env.get("BOT_TOKEN") || "");
 export const kv = await Deno.openKv();
 
+// Import some env
 export const channelId = Number(Deno.env.get("CHANNEL_ID"));
 export const groupId = Number(Deno.env.get("GROUP_ID"));
 
-bot.chatType("channel").command("post", async (ctx) => {
-  if (ctx.chat.id != channelId) return;
+// Add update command to list of my commands
+await bot.api.setMyCommands([
+  { command: "update", description: "Обновить список заказ-нарядов" },
+]);
 
-  await setPost(ctx.channelPost.message_id);
-  await updatePost();
-});
+// Work only in my channel and group
+bot.use(verify);
 
+// On post in channel -> set post
 bot.chatType("channel").on("channel_post:caption", async (ctx) => {
-  if (ctx.chat.id != channelId) return;
-
-  await createOrder(ctx.channelPost.message_id, ctx.channelPost.caption);
-  await updatePost();
+  await setPostData(ctx.channelPost.message_id, {
+    caption: ctx.channelPost.caption,
+    status: "work",
+    createdAt: new Date(),
+  });
+  await updateList();
 });
 
-bot.chatType("supergroup").hears(["Обновить", "обновить"], async (ctx) => {
-  if (ctx.chat.id != groupId) return;
+// On post in group -> add buttons
+bot.chatType("supergroup").on(":is_automatic_forward", async (ctx) => {
+  const forward = ctx.message.forward_origin;
+  if (!forward) return;
+  if (forward.type != "channel") return;
 
+  const postData = await getPostData(forward.message_id);
+  if (!postData) return;
+
+  const reply_markup = generateKeyboard(
+    forward.message_id,
+    postData.status,
+  );
+
+  await ctx.reply(generateText(postData.status), {
+    reply_parameters: { message_id: ctx.msgId },
+    reply_markup,
+  });
+});
+
+// Update command (updates list (really))
+bot.chatType("supergroup").command("update", async (ctx) => {
   try {
-    await updatePost();
+    await updateList();
     await ctx.react("👍");
   } catch {
-    await ctx.react("😐");
+    await ctx.react("🌚");
   }
 });
 
-bot.chatType("supergroup").hears(["сбросить", "Сбросить"], async (ctx) => {
-  if (ctx.chat.id != groupId) return;
-  if (!ctx.message.reply_to_message) return;
-  if (!ctx.message.reply_to_message.is_automatic_forward) return;
-  if (!ctx.message.reply_to_message.forward_origin) return;
-  if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
-  if (ctx.message.reply_to_message.forward_origin.chat.id != channelId) return;
+// Other composers
+bot.use(keyboardComposer);
+bot.use(listComposer);
 
-  await resetOrderDate(ctx.message.reply_to_message.forward_origin.message_id);
-  await updatePost();
-  await ctx.react("👍");
+// Post deletion listener
+kv.listenQueue(async (postId: number) => {
+  const post = await getPostData(postId);
+  if (post?.status != "recent") return;
+
+  await deletePost(postId);
+  await updateList();
 });
 
-bot.chatType("supergroup").hears(
-  ["готов", "Готов", "на выдачу", "На выдачу"],
-  async (ctx) => {
-    if (ctx.chat.id != groupId) return;
-    if (!ctx.message.reply_to_message) return;
-    if (!ctx.message.reply_to_message.is_automatic_forward) return;
-    if (!ctx.message.reply_to_message.forward_origin) return;
-    if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
-    if (
-      ctx.message.reply_to_message.forward_origin.chat.id != channelId
-    ) return;
-
-    await setOrderStatus(
-      ctx.message.reply_to_message.forward_origin.message_id,
-      "out",
-    );
-    await updatePost();
-    await ctx.react("👍");
-  },
-);
-
-bot.chatType("supergroup").hears(
-  ["в работу", "В работу"],
-  async (ctx) => {
-    if (ctx.chat.id != groupId) return;
-    if (!ctx.message.reply_to_message) return;
-    if (!ctx.message.reply_to_message.is_automatic_forward) return;
-    if (!ctx.message.reply_to_message.forward_origin) return;
-    if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
-    if (
-      ctx.message.reply_to_message.forward_origin.chat.id != channelId
-    ) return;
-
-    await setOrderStatus(
-      ctx.message.reply_to_message.forward_origin.message_id,
-      "work",
-    );
-    await updatePost();
-    await ctx.react("👍");
-  },
-);
-
-bot.chatType("supergroup").hears(
-  ["выдан", "Выдан", "Выдал", "выдал"],
-  async (ctx) => {
-    if (ctx.chat.id != groupId) return;
-    if (!ctx.message.reply_to_message) return;
-    if (!ctx.message.reply_to_message.is_automatic_forward) return;
-    if (!ctx.message.reply_to_message.forward_origin) return;
-    if (ctx.message.reply_to_message.forward_origin.type != "channel") return;
-    if (
-      ctx.message.reply_to_message.forward_origin.chat.id != channelId
-    ) return;
-
-    await setOrderStatus(
-      ctx.message.reply_to_message.forward_origin.message_id,
-      "recent",
-    );
-    await requestOrderDelete(
-      ctx.message.reply_to_message.forward_origin.message_id,
-    );
-    await updatePost();
-    await ctx.react("👍");
-  },
-);
-
-bot.chatType("supergroup").hears(/^(?:у|У)брать .*/, async (ctx) => {
-  if (ctx.chat.id != groupId) return;
-  if (!ctx.message.text) return;
-  try {
-    await deleteOrder(Number(ctx.message.text.split(" ")[1].split("/").pop()));
-    await updatePost();
-    await ctx.react("👍");
-  } catch {
-    await ctx.react("😐");
-  }
-});
-
-kv.listenQueue(async (value: { type: "delete"; id: number }) => {
-  if (value.type != "delete") return;
-
-  const order = await kv.get<OrderData>(orderKey(value.id));
-  if (order.value?.status != "recent") return;
-
-  await deleteOrder(value.id);
-  await updatePost();
-});
-
+// Graceful catch
 bot.catch((error) => console.error(error.message));
