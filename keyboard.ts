@@ -51,7 +51,14 @@ keyboardComposer.callbackQuery(/work-[0-9]+/, async (ctx) => {
     reply_markup: generateKeyboard(postId, "work"),
   });
   await updateList();
-  await ctx.answerCallbackQuery({ text: "Заказ-наряд теперь в работе!" });
+  if (!ctx.chat) return;
+  await ctx.api.sendMessage(ctx.chat.id, "🛠️ Заказ-наряд теперь в работе.", {
+    reply_parameters: {
+      message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+    },
+    disable_notification: true,
+  });
+  await ctx.answerCallbackQuery();
 });
 
 keyboardComposer.callbackQuery(/out-[0-9]+/, async (ctx) => {
@@ -61,7 +68,14 @@ keyboardComposer.callbackQuery(/out-[0-9]+/, async (ctx) => {
     reply_markup: generateKeyboard(postId, "out"),
   });
   await updateList();
-  await ctx.answerCallbackQuery({ text: "Заказ-наряд теперь на выдаче!" });
+  if (!ctx.chat) return;
+  await ctx.api.sendMessage(ctx.chat.id, "📤 Заказ-наряд теперь на выдаче.", {
+    reply_parameters: {
+      message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+    },
+    disable_notification: true,
+  });
+  await ctx.answerCallbackQuery();
 });
 
 keyboardComposer.callbackQuery(/recent-[0-9]+/, async (ctx) => {
@@ -71,8 +85,20 @@ keyboardComposer.callbackQuery(/recent-[0-9]+/, async (ctx) => {
     reply_markup: generateKeyboard(postId, "recent"),
   });
   await updateList();
-  await requestRecentDelete(postId); // ESPECIALLY FOR RECENT WE REQUEST DELETION
-  await ctx.answerCallbackQuery({ text: "Заказ-наряд выдан!" });
+  await requestRecentDelete(postId); // ESPECIALLY FOR RECENT WE
+  if (!ctx.chat) return;
+  await ctx.api.sendMessage(
+    ctx.chat.id,
+    "🕒 Заказ-наряд теперь недавно выданный.",
+    {
+      reply_parameters: {
+        message_id: ctx.callbackQuery.message?.reply_to_message?.message_id ||
+          0,
+      },
+      disable_notification: true,
+    },
+  );
+  await ctx.answerCallbackQuery();
 });
 
 keyboardComposer.callbackQuery(/reset-[0-9]+/, async (ctx) => {
@@ -80,9 +106,9 @@ keyboardComposer.callbackQuery(/reset-[0-9]+/, async (ctx) => {
   await resetPostDate(postId);
   try {
     await updateList();
-    await ctx.answerCallbackQuery({ text: "Дата заказ-наряда сброшена!" });
+    await ctx.answerCallbackQuery();
   } catch {
-    await ctx.answerCallbackQuery({ text: "Дата заказ-наряда уже текущая!" });
+    await ctx.answerCallbackQuery();
   }
 });
 

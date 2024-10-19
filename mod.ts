@@ -19,6 +19,7 @@ export const groupId = Number(Deno.env.get("GROUP_ID"));
 // Add update command to list of my commands
 await bot.api.setMyCommands([
   { command: "update", description: "Обновить список заказ-нарядов" },
+  { command: "buttons", description: "Добавить панель кнопок" },
 ]);
 
 // Work only in my channel and group
@@ -62,6 +63,27 @@ bot.chatType("supergroup").command("update", async (ctx) => {
   } catch {
     await ctx.react("🌚");
   }
+});
+
+// Add buttons manually
+bot.chatType("supergroup").command("buttons", async (ctx) => {
+  const reply = ctx.message.reply_to_message;
+  if (!reply) return;
+  if (!reply.forward_origin) return;
+  if (reply.forward_origin.type != "channel") return;
+
+  const postData = await getPostData(reply.forward_origin.message_id);
+  if (!postData) return;
+
+  const reply_markup = generateKeyboard(
+    reply.forward_origin.message_id,
+    postData.status,
+  );
+
+  await ctx.reply(generateText(postData.status), {
+    reply_parameters: { message_id: reply.message_id },
+    reply_markup,
+  });
 });
 
 // Other composers
