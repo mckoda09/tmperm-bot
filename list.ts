@@ -14,6 +14,7 @@ listComposer.chatType("channel").command("list", async (ctx) => {
 
 // List names
 const listEnum = {
+  new_: "🆕 Новые",
   work: "🛠️ В работе",
   out: "📤 На выдаче",
   recent: "🕒 Недавно выданные",
@@ -22,9 +23,9 @@ const listEnum = {
 // Generate list names
 const generateListText = async () => {
   const posts = await listPosts();
-  const { work, out, recent } = Object.groupBy(posts, (x) => x.status);
+  const { new_, work, out, recent } = Object.groupBy(posts, (x) => x.status);
 
-  const text = [work, out, recent].map((list) =>
+  const text = [new_, work, out, recent].map((list) =>
     list
       ? listEnum[list[0].status] + "\n" +
         list.map((e, i) =>

@@ -29,7 +29,7 @@ bot.use(verify);
 bot.chatType("channel").on("channel_post:caption", async (ctx) => {
   await setPostData(ctx.channelPost.message_id, {
     caption: ctx.channelPost.caption,
-    status: "work",
+    status: "new_",
     createdAt: new Date(),
   });
   await updateList();

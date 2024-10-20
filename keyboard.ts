@@ -5,6 +5,7 @@ import { kv } from "./mod.ts";
 
 // Status names
 const statusEnum = {
+  new_: "🆕 Новый",
   work: "🛠️ В работе",
   out: "📤 На выдаче",
   recent: "🕒 Недавно выданный",
@@ -15,8 +16,16 @@ export const generateKeyboard = (id: number, status: OrderStatus) => {
   const keyboard = new InlineKeyboard();
 
   switch (status) {
+    case "new_":
+      keyboard.text("В работу →", `work-${id}`).row();
+      break;
     case "work":
-      keyboard.text("Готов →", `out-${id}`).row();
+      keyboard
+        .text("← В новые", `new-${id}`).row()
+        .text(
+          "На выдачу →",
+          `out-${id}`,
+        ).row();
       break;
     case "out":
       keyboard
@@ -44,6 +53,23 @@ export const generateText = (status: OrderStatus) => {
 export const keyboardComposer = new Composer();
 
 // Status changes
+keyboardComposer.callbackQuery(/new-[0-9]+/, async (ctx) => {
+  const postId = Number(ctx.callbackQuery.data.split("-")[1]);
+  await updatePostStatus(postId, "new_");
+  await ctx.editMessageText(generateText("new_"), {
+    reply_markup: generateKeyboard(postId, "new_"),
+  });
+  await updateList();
+  if (!ctx.chat) return;
+  await ctx.api.sendMessage(ctx.chat.id, "🆕 Заказ-наряд теперь новый.", {
+    reply_parameters: {
+      message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+    },
+    disable_notification: true,
+  });
+  await ctx.answerCallbackQuery();
+});
+
 keyboardComposer.callbackQuery(/work-[0-9]+/, async (ctx) => {
   const postId = Number(ctx.callbackQuery.data.split("-")[1]);
   await updatePostStatus(postId, "work");

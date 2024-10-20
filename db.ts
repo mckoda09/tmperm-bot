@@ -1,6 +1,6 @@
 import { kv } from "./mod.ts";
 
-export type OrderStatus = "work" | "out" | "recent";
+export type OrderStatus = "new_" | "work" | "out" | "recent";
 
 export interface PostData {
   caption: string;
