@@ -86,6 +86,17 @@ bot.chatType("supergroup").command("buttons", async (ctx) => {
   });
 });
 
+bot.chatType("supergroup").command("enqueue", async (ctx) => {
+  const reply = ctx.message.reply_to_message;
+  if (!reply) return;
+  if (!reply.forward_origin) return;
+  if (reply.forward_origin.type != "channel") return;
+
+  await kv.enqueue(reply.forward_origin.message_id, { delay: 3 * 1000 });
+
+  await ctx.react("⚡");
+});
+
 // Other composers
 bot.use(keyboardComposer);
 bot.use(listComposer);
