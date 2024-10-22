@@ -16,7 +16,7 @@ listComposer.chatType("channel").command("list", async (ctx) => {
 const listEnum = {
   new_: "🆕 Новые",
   work: "🛠️ В работе",
-  out: "📤 На выдаче",
+  out: "📤 Готовые",
   recent: "🕒 Недавно выданные",
 };
 

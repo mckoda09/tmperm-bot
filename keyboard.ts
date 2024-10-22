@@ -7,7 +7,7 @@ import { kv } from "./mod.ts";
 const statusEnum = {
   new_: "🆕 Новый",
   work: "🛠️ В работе",
-  out: "📤 На выдаче",
+  out: "📤 Готовые",
   recent: "🕒 Недавно выданный",
 };
 
@@ -23,7 +23,7 @@ export const generateKeyboard = (id: number, status: OrderStatus) => {
       keyboard
         .text("← В новые", `new-${id}`).row()
         .text(
-          "На выдачу →",
+          "Готов →",
           `out-${id}`,
         ).row();
       break;
@@ -36,7 +36,7 @@ export const generateKeyboard = (id: number, status: OrderStatus) => {
         ).row();
       break;
     case "recent":
-      keyboard.text("← На выдачу", `out-${id}`).row();
+      keyboard.text("← В готовые", `out-${id}`).row();
       break;
   }
 
@@ -61,7 +61,7 @@ keyboardComposer.callbackQuery(/new-[0-9]+/, async (ctx) => {
   });
   await updateList();
   if (!ctx.chat) return;
-  await ctx.api.sendMessage(ctx.chat.id, "🆕 Заказ-наряд теперь новый.", {
+  await ctx.api.sendMessage(ctx.chat.id, "🆕 Заказ-наряд теперь новый. ("+ctx.from.first_name+")", {
     reply_parameters: {
       message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
     },
@@ -78,7 +78,7 @@ keyboardComposer.callbackQuery(/work-[0-9]+/, async (ctx) => {
   });
   await updateList();
   if (!ctx.chat) return;
-  await ctx.api.sendMessage(ctx.chat.id, "🛠️ Заказ-наряд теперь в работе.", {
+  await ctx.api.sendMessage(ctx.chat.id, "🛠️ Заказ-наряд теперь в работе. ("+ctx.from.first_name+")", {
     reply_parameters: {
       message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
     },
@@ -95,7 +95,7 @@ keyboardComposer.callbackQuery(/out-[0-9]+/, async (ctx) => {
   });
   await updateList();
   if (!ctx.chat) return;
-  await ctx.api.sendMessage(ctx.chat.id, "📤 Заказ-наряд теперь на выдаче.", {
+  await ctx.api.sendMessage(ctx.chat.id, "📤 Заказ-наряд теперь готовый. ("+ctx.from.first_name+")", {
     reply_parameters: {
       message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
     },
@@ -115,7 +115,7 @@ keyboardComposer.callbackQuery(/recent-[0-9]+/, async (ctx) => {
   if (!ctx.chat) return;
   await ctx.api.sendMessage(
     ctx.chat.id,
-    "🕒 Заказ-наряд теперь недавно выданный.",
+    "🕒 Заказ-наряд теперь недавно выданный. ("+ctx.from.first_name+")",
     {
       reply_parameters: {
         message_id: ctx.callbackQuery.message?.reply_to_message?.message_id ||
