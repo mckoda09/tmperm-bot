@@ -92,7 +92,7 @@ bot.chatType("supergroup").command("enqueue", async (ctx) => {
   if (!reply.forward_origin) return;
   if (reply.forward_origin.type != "channel") return;
 
-  await kv.enqueue(reply.forward_origin.message_id, { delay: 3 * 1000 });
+  await kv.enqueue(reply.forward_origin.message_id);
 
   await ctx.react("⚡");
 });

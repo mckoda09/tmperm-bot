@@ -140,5 +140,5 @@ keyboardComposer.callbackQuery(/reset-[0-9]+/, async (ctx) => {
 
 // hehe
 const requestRecentDelete = async (postId: number) => {
-  await kv.enqueue(postId, { delay: 3 * 24 * 60 * 60 * 1000 });
+  await kv.enqueue(postId, { delay: 2 * 24 * 60 * 60 * 1000 });
 };
