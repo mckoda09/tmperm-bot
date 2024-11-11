@@ -40,7 +40,9 @@ const generateListText = async () => {
           }/${e.id}">${e.caption}</a>`
         ).join("\n")
       : ""
-  ).filter((text) => text.length).join("\n\n");
+  )
+    .filter((text) => text.length)
+    .join("\n\n");
 
   return text.length ? text : "Заказ-нарядов нет.";
 };

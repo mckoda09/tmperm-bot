@@ -21,19 +21,17 @@ export const generateKeyboard = (id: number, status: OrderStatus) => {
       break;
     case "work":
       keyboard
-        .text("← В новые", `new-${id}`).row()
-        .text(
-          "Готов →",
-          `out-${id}`,
-        ).row();
+        .text("← В новые", `new-${id}`)
+        .row()
+        .text("Готов →", `out-${id}`)
+        .row();
       break;
     case "out":
       keyboard
-        .text("← В работу", `work-${id}`).row()
-        .text(
-          "Выдать →",
-          `recent-${id}`,
-        ).row();
+        .text("← В работу", `work-${id}`)
+        .row()
+        .text("Выдать →", `recent-${id}`)
+        .row();
       break;
     case "recent":
       keyboard.text("← В готовые", `out-${id}`).row();
@@ -61,12 +59,17 @@ keyboardComposer.callbackQuery(/new-[0-9]+/, async (ctx) => {
   });
   await updateList();
   if (!ctx.chat) return;
-  await ctx.api.sendMessage(ctx.chat.id, "🆕 Заказ-наряд теперь новый. ("+ctx.from.first_name+")", {
-    reply_parameters: {
-      message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+  await ctx.api.sendMessage(
+    ctx.chat.id,
+    "🆕 Новый (" + ctx.from.first_name + ")",
+    {
+      reply_parameters: {
+        message_id:
+          ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+      },
+      disable_notification: true,
     },
-    disable_notification: true,
-  });
+  );
   await ctx.answerCallbackQuery();
 });
 
@@ -78,12 +81,17 @@ keyboardComposer.callbackQuery(/work-[0-9]+/, async (ctx) => {
   });
   await updateList();
   if (!ctx.chat) return;
-  await ctx.api.sendMessage(ctx.chat.id, "🛠️ Заказ-наряд теперь в работе. ("+ctx.from.first_name+")", {
-    reply_parameters: {
-      message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+  await ctx.api.sendMessage(
+    ctx.chat.id,
+    "🛠️ В работе (" + ctx.from.first_name + ")",
+    {
+      reply_parameters: {
+        message_id:
+          ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+      },
+      disable_notification: true,
     },
-    disable_notification: true,
-  });
+  );
   await ctx.answerCallbackQuery();
 });
 
@@ -95,12 +103,17 @@ keyboardComposer.callbackQuery(/out-[0-9]+/, async (ctx) => {
   });
   await updateList();
   if (!ctx.chat) return;
-  await ctx.api.sendMessage(ctx.chat.id, "📤 Заказ-наряд теперь готовый. ("+ctx.from.first_name+")", {
-    reply_parameters: {
-      message_id: ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+  await ctx.api.sendMessage(
+    ctx.chat.id,
+    "📤 Готовый (" + ctx.from.first_name + ")",
+    {
+      reply_parameters: {
+        message_id:
+          ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
+      },
+      disable_notification: true,
     },
-    disable_notification: true,
-  });
+  );
   await ctx.answerCallbackQuery();
 });
 
@@ -111,15 +124,15 @@ keyboardComposer.callbackQuery(/recent-[0-9]+/, async (ctx) => {
     reply_markup: generateKeyboard(postId, "recent"),
   });
   await updateList();
-  await requestRecentDelete(postId); // ESPECIALLY FOR RECENT WE
+  await requestRecentDelete(postId); // ESPECIALLY FOR RECENT
   if (!ctx.chat) return;
   await ctx.api.sendMessage(
     ctx.chat.id,
-    "🕒 Заказ-наряд теперь недавно выданный. ("+ctx.from.first_name+")",
+    "🕒 Недавно выданный (" + ctx.from.first_name + ")",
     {
       reply_parameters: {
-        message_id: ctx.callbackQuery.message?.reply_to_message?.message_id ||
-          0,
+        message_id:
+          ctx.callbackQuery.message?.reply_to_message?.message_id || 0,
       },
       disable_notification: true,
     },

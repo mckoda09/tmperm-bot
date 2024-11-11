@@ -86,6 +86,7 @@ bot.chatType("supergroup").command("buttons", async (ctx) => {
   });
 });
 
+// Delete order manually
 bot.chatType("supergroup").command("enqueue", async (ctx) => {
   const reply = ctx.message.reply_to_message;
   if (!reply) return;
