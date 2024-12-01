@@ -30,6 +30,16 @@ export const updatePostStatus = async (id: number, status: OrderStatus) => {
     .commit();
 };
 
+export const updatePostCaption = async (id: number, caption: string) => {
+  const post = await kv.get<PostData>(postDataKey(id));
+
+  await kv
+    .atomic()
+    .check(post)
+    .set(post.key, { ...post.value, caption })
+    .commit();
+};
+
 export const resetPostDate = async (id: number) => {
   const post = await kv.get<PostData>(postDataKey(id));
   await kv

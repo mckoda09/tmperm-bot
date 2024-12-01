@@ -1,6 +1,12 @@
 import { Bot } from "grammy";
 import { verify } from "./verify.ts";
-import { deletePost, getPostData, setPostData } from "./db.ts";
+import {
+  deletePost,
+  getPostData,
+  setPostData,
+  updatePostCaption,
+  updatePostStatus,
+} from "./db.ts";
 import {
   generateKeyboard,
   generateText,
@@ -32,6 +38,16 @@ bot.chatType("channel").on("channel_post:caption", async (ctx) => {
     status: "new_",
     createdAt: new Date(),
   });
+  await updateList();
+});
+
+bot.chatType("channel").on("edited_channel_post:media", async (c) => {
+  if (!c.editedChannelPost.caption) return;
+  await updatePostCaption(
+    c.editedChannelPost.message_id,
+    c.editedChannelPost.caption,
+  );
+
   await updateList();
 });
 
